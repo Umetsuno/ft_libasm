@@ -1,7 +1,7 @@
 section .text
-global strlen
+global ft_strlen
 
-strlen:
+ft_strlen:
     mov rax, 0              ; Initialize the counter to 0
     cmp byte [rdi], 0       ; Check if the first byte us null
     je .done                ; If true, return 0
