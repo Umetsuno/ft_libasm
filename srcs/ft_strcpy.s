@@ -1,5 +1,7 @@
 section .text
 global ft_strcpy
+extern __errno_location
+
 
 ft_strcpy:
     mov rax, rdi                    ; Copy the destination pointer to rax
@@ -23,7 +25,7 @@ ft_strcpy:
     jmp .set_errno
 
 .set_errno:
-    mov rdi, [rel errno_location]   ; Set errno using the errno_location external symbol (rdi = &errno)
+    mov rdi, [rel __errno_location]   ; Set errno using the __errno_location external symbol (rdi = &errno)
     mov dword [rdi], eax            ; Set errno to eax, previously set to EINVAL
 
 .done:
