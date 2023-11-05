@@ -1,33 +1,17 @@
-section .text
 global ft_strcpy
-extern __errno_location
-
 
 ft_strcpy:
-    mov rax, rdi                    ; Copy the destination pointer to rax
-    mov rcx, rsi                    ; Copy the source pointer to rcx
-    cmp rax, rcx                    ; Check if the pointers are equal (self-copy)
-    je .done
-    test rcx, rcx                   ; Check if the source pointer is null
-    je .set_errno_einval
+	test	rsi, rsi			; Check if source string (rsi) is null
+	je		.end
+	mov		rax, rdi			; Copy rdi (destination string pointer) to rax (return value)
+.loop:		
+	mov		dl, byte [rsi]		; Copy byte from source string to destination string
+	mov		byte [rdi], dl
+	cmp		byte [rsi], 0		; Check the end of the source string
+	je		.end
+	inc		rsi					; Increment source and destination string pointers
+	inc		rdi
+	jmp		.loop
 
-.loop:
-    movzx rdx, byte [rcx]           ; Load a byte from [rcx] with zero-extension (rdx = *src)
-    mov [rax], dl                   ; Store the byte in [rax] (*dest = *src)
-    test dl, dl                     ; Check if the byte is null
-    je .done
-    inc rcx                         ; src++
-    inc rax                         ; dest++
-    jmp .loop
-
-.set_errno_einval:
-    mov eax, 22                     ; errno = EINVAL
-    jmp .set_errno
-
-.set_errno:
-    mov rdi, [rel __errno_location]   ; Set errno using the __errno_location external symbol (rdi = &errno)
-    mov dword [rdi], eax            ; Set errno to eax, previously set to EINVAL
-
-.done:
-    xor eax, eax                    ; return dest
-    ret
+.end:		
+	ret

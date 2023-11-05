@@ -2,14 +2,18 @@ section .text
 global ft_strlen
 
 ft_strlen:
-    mov rax, 0              ; Initialize the counter to 0
-    cmp byte [rdi], 0       ; Check if the first byte us null
-    je .done                ; If true, return 0
+    ; Set up the function
+    push rbp
+    mov rbp, rsp
+    xor rax, rax
 
 .loop:
-    inc rax                 ; Increment the counter
-    cmp byte [rdi+rax], 0   ; Check if the next byte is null terminator
-    jne .loop               ; If not, keep looping
+    movzx rdx, byte [rdi+rax]       ; Load the current character into rdx
+    test rdx, rdx                   ; If the current character is 0, we've reached the end of the string
+    jz .end
+    inc rax                         ; loop otherwise
+    jmp .loop
 
-.done:
+.end:
+    pop rbp
     ret

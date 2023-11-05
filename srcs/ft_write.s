@@ -1,23 +1,21 @@
 section .text
 global ft_write
-extern __errno_location
-
-; this implementation asumes that the arguments are already provided
-; rdi is the file descriptor in argv[0]
-; rsi is the string to write in argv[1]
-; rdx is the length of the string in argv[2]
+extern    __errno_location
 
 ft_write:
-    mov rax, 1                  ; syscall number for write
-    syscall
-    cmp rax, -1                 ; check for error by comparing the return value with -1
-    jns no_error                ; if the return value is not negative, there was no error
+    ; syscall write
+    mov     rax, 1                      ; sys_write system call number (1 for sys_write)
+    syscall                             ; Call the kernel to write to the file descriptor specified in rdi
 
-    call __errno_location       ; call the __errno_location function to get the address of the errno variable
-    mov rax, rdi                ; move the file descriptor to rax
-
-    ; mov rax, -1                 ; set the return value to -1
+    ; Result returned in rax
+    test    rax, rax                    ; error check
+    js      .error
     ret
 
-no_error:
+.error:                                 ; rax will be set to &errno
+    neg        rax                      ; Negative value in rax because the syscall returns errno as a negative value
+    mov        rdi, rax                 ; Move rax to rdi as a buffer, as rax will hold the return value of errno location
+    call    __errno_location WRT ..plt  ; Call __errno_location with position-independent code
+    mov        [rax], rdi               ; errno location returns a pointer to errno; store rdi into errno
+    mov        rax, -1                  ; Set rax to -1 to return the correct value for a write syscall
     ret
